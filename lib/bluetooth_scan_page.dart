@@ -18,8 +18,7 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
 
   bool _isScanning = true;
   final _isConnected = false.obs;
-  // var deviceName = "Cerathrive".obs;
-  var deviceName = "Lumalex".obs;
+  var deviceName = "Lumaflex".obs;
   @override
   void initState() {
     Get.put(deviceName);
