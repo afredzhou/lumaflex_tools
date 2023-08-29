@@ -175,12 +175,14 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
                                     (states) => const TextStyle(fontSize: 16),
                               ),
                             ),
-                            onPressed: () {
+                            onPressed: () async {
                               if (_isConnected.value) {
                                 _disconnect(device);
                               } else {
                                 _connect(device);
+                                await Future.delayed(Duration(seconds: 1)); // 添加一个延迟，这里是延迟2秒
                                 Get.to(BluetoothCommand(device: device));
+
                               }
                             },
                             child: Obx(() => Text(_isConnected.value ? "Disconnect" : "Connect")),
