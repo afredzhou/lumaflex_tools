@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:lumaflex_tools/view/custom_app_bar.dart';
@@ -50,19 +52,25 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
     scanResults.add(device);} // 添加设备到 scanResults 列表
   }
 
-  void _connect(device) async{
+  Future<bool> _connect(device) async {
+    Completer<bool> completer = Completer<bool>(); // 创建一个 Completer<bool> 对象
+
     await device.connect();
+
     device.connectionState.listen((connectionState) {
       if (connectionState == BluetoothConnectionState.connected) {
         if (kDebugMode.value) {
           print("Connected successfully");
         }
         _isConnected.value = true;
+        completer.complete(true); // 完成 Future，并返回 true
       } else if (connectionState == BluetoothConnectionState.disconnected) {
-        print("Disconnected");
         _isConnected.value = false;
+        completer.complete(null); // 完成 Future，并返回 false
       }
     });
+
+    return completer.future; // 返回 Future<bool>
   }
 
   void _disconnect(device) async {
@@ -85,7 +93,9 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
   }
   @override
   void dispose() {
-    FlutterBluePlus.stopScan(); // 停止扫描
+    _disconnect(scanResults);
+    _stopScan();
+// 停止扫描
     super.dispose();
   }
   @override
@@ -179,10 +189,11 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
                               if (_isConnected.value) {
                                 _disconnect(device);
                               } else {
-                                _connect(device);
-                                await Future.delayed(Duration(seconds: 1)); // 添加一个延迟，这里是延迟2秒
-                                Get.to(BluetoothCommand(device: device));
-
+                                _connect(device).then((value) {
+                                  value == true ? Future.delayed(Duration(seconds: 1), () {
+                                    Get.to(BluetoothCommand(device: device));
+                                  }) : null;
+                                });
                               }
                             },
                             child: Obx(() => Text(_isConnected.value ? "Disconnect" : "Connect")),
