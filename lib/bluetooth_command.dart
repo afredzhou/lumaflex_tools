@@ -6,7 +6,7 @@ import 'bytesToHexString.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:lumaflex_tools/startNotify.dart';
 import 'package:get/get.dart';
-
+final RxString deviceName = Get.find();
 class BluetoothCommand extends StatefulWidget {
   final BluetoothDevice device;// 添加一个名为 Device 的参数
   const BluetoothCommand({Key? key, required this.device}) : super(key: key);
@@ -89,7 +89,7 @@ class BluetoothCommandState extends State<BluetoothCommand> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        title: 'Energy Lounger',
+        title:deviceName.value,
       ),
       body: Center(
         child: Column(
@@ -103,7 +103,8 @@ class BluetoothCommandState extends State<BluetoothCommand> {
             Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Data from energy lounger: ${data.value}',
+                  Text(//
+                    'Data from ${deviceName.value}：${data.value} ',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 22,

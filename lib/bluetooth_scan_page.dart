@@ -93,7 +93,7 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
   }
   @override
   void dispose() {
-    _disconnect(scanResults);
+    // _disconnect(scanResults);
     _stopScan();
 // 停止扫描
     super.dispose();
