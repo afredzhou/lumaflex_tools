@@ -4,7 +4,14 @@ import 'package:lumaflex_tools/view/custom_app_bar.dart';
 import 'bluetooth_command.dart';
 import 'start_scan.dart';
 import 'package:get/get.dart';
-final List<BluetoothDevice> scanResults = <BluetoothDevice>[];
+class BluetoothController extends GetxController {
+  final scanResults = RxList<BluetoothDevice>();
+
+  void addDevice(BluetoothDevice device) {
+    scanResults.add(device);
+  }
+}
+
 final RxBool kDebugMode = Get.find(); // 在需要的地方获取全局变量
 
 class BluetoothScanPage extends StatefulWidget {
@@ -16,6 +23,9 @@ class BluetoothScanPage extends StatefulWidget {
 
 class _BluetoothScanPageState extends State<BluetoothScanPage> {
 
+
+  final RxList<BluetoothDevice> scanResults = RxList<BluetoothDevice>();
+
   bool _isScanning = true;
   final _isConnected = false.obs;
   var deviceName = "Lumaflex".obs;
@@ -24,6 +34,20 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
     Get.put(deviceName);
     super.initState();
     _startScan();
+  }
+  Future<void> _startScan() async {
+    if(!_isConnected.value)
+      {
+    scanResults.clear();
+    }
+  // 清空设备列表
+    BluetoothDevice device = await startScan(); // 扫描设备
+    if (kDebugMode.value) {
+      print(device.localName);
+    }
+    if( !scanResults.contains(device))
+    {
+    scanResults.add(device);} // 添加设备到 scanResults 列表
   }
 
   void _connect(device) async{
@@ -116,55 +140,56 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
               ),
             ),
             Expanded(
-              child: ListView.builder(
-                itemCount: scanResults.length,
-                itemBuilder: (context, index) {
-                  final BluetoothDevice device = scanResults[index];
-                  return Container(
-                    margin: const EdgeInsets.symmetric(vertical: 8.0),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8.0),
-                      border: Border.all(color: Colors.grey),
-                      color: const Color(0xFFF0F0F0), // 设置背景颜色
-                    ),
-                    child: ListTile(
-                      leading: const Icon(
-                        Icons.bluetooth,
-                        color: Colors.black,
-                      ),
-                      title: Text(
-                        device.localName,
-                        style: const TextStyle(color: Colors.black),
-                      ),
-                        subtitle: Text(
-                          device.remoteId.toString(),
-                          style: const TextStyle(color: Colors.black),
+              child: Obx(
+                      () =>
+                    ListView.builder(
+                    itemCount: scanResults.length,
+                    itemBuilder: (context, index) {
+                      final BluetoothDevice device = scanResults[index];
+                      return Container(
+                        margin: const EdgeInsets.symmetric(vertical: 8.0),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8.0),
+                          border: Border.all(color: Colors.grey),
+                          color: const Color(0xFFF0F0F0),
                         ),
-                      trailing: ElevatedButton(
-                        style: ButtonStyle(
-                          minimumSize:
-                          MaterialStateProperty.all<Size>(const Size(150, 30)),
-                          // 设置按钮最小尺寸为150x50
-                          fixedSize: MaterialStateProperty.all<Size>(const Size(150, 30)),
-                          backgroundColor: MaterialStateProperty.all(Colors.red),
-                          textStyle: MaterialStateProperty.resolveWith<TextStyle>(
-                                (states) =>
-                                const TextStyle(fontSize: 16), // 设置按钮文本的字体大小为16
+                        child: ListTile(
+                          leading: const Icon(
+                            Icons.bluetooth,
+                            color: Colors.black,
+                          ),
+                          title: Text(
+                            device.localName,
+                            style: const TextStyle(color: Colors.black),
+                          ),
+                          subtitle: Text(
+                            device.remoteId.toString(),
+                            style: const TextStyle(color: Colors.black),
+                          ),
+                          trailing: ElevatedButton(
+                            style: ButtonStyle(
+                              minimumSize: MaterialStateProperty.all<Size>(const Size(150, 30)),
+                              fixedSize: MaterialStateProperty.all<Size>(const Size(150, 30)),
+                              backgroundColor: MaterialStateProperty.all(Colors.red),
+                              textStyle: MaterialStateProperty.resolveWith<TextStyle>(
+                                    (states) => const TextStyle(fontSize: 16),
+                              ),
+                            ),
+                            onPressed: () {
+                              if (_isConnected.value) {
+                                _disconnect(device);
+                              } else {
+                                _connect(device);
+                                Get.to(BluetoothCommand(device: device));
+                              }
+                            },
+                            child: Obx(() => Text(_isConnected.value ? "Disconnect" : "Connect")),
                           ),
                         ),
-                        onPressed: () {
-                          if (_isConnected.value) {
-                            _disconnect(device);
-                          } else {
-                            _connect(device);
-                            Get.to(BluetoothCommand(device: device));
-                          }
-                        },
-                        child: Obx(() => Text(_isConnected.value ? "Disconnect" : "Connect"))
-                      ),
-                    ),
-                  );
-                },
+                      );
+                    },
+                  ),
+
               ),
             ),
           ],
@@ -191,10 +216,3 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
 }
 
 
-Future<void> _startScan() async {
-  scanResults.clear(); // 清空设备列表
-  BluetoothDevice device = await startScan(); // 扫描设备
-  if (!scanResults.contains(device)) {
-    scanResults.add(device); // 将设备添加到 scanResults 列表中
-  }
-}
