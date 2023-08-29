@@ -192,6 +192,7 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
 
 
 Future<void> _startScan() async {
+  scanResults.clear(); // 清空设备列表
   BluetoothDevice device = await startScan(); // 扫描设备
   if (!scanResults.contains(device)) {
     scanResults.add(device); // 将设备添加到 scanResults 列表中
