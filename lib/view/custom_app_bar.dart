@@ -3,44 +3,41 @@ import 'package:get/get.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
-  final Function? onLeadingPressed;
-  final Function? onActionPressed;
+  final Widget? leading;
 
   const CustomAppBar({
     Key? key,
     required this.title,
-    this.onLeadingPressed,
-    this.onActionPressed,
+    this.leading,
   }) : super(key: key);
 
   @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
       title: Text(
         title,
-        style: TextStyle(
+        style: const TextStyle(
           fontFamily: 'BebasNeue-Regular',
           // other text style properties...
         ),
       ),
       backgroundColor: Colors.black,
       centerTitle: true,
-      leading: IconButton(
-        icon: Icon(Icons.arrow_back),
+      leading:leading != null ? IconButton(
+        icon: const Icon(Icons.arrow_back),
         onPressed: () {
           Get.back(); // Add Get.back() here for navigation
-          if (onLeadingPressed != null) {
-            onLeadingPressed!(); // Call onLeadingPressed callback if provided
-          }
         },
-      ),
+      ) : null,
       actions: <Widget>[
         IconButton(
-          icon: Icon(Icons.menu),
-          onPressed: onActionPressed as void Function()?,
+          icon: const Icon(Icons.menu),
+          onPressed: () {
+            // do something
+          },
         ),
       ],
     );

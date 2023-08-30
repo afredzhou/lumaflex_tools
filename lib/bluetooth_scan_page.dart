@@ -30,7 +30,8 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
 
   bool _isScanning = true;
   final _isConnected = false.obs;
-  var deviceName = "Lumaflex".obs;
+  var deviceName = "Cerathrive".obs;
+  // var deviceName = "Lumaflex".obs;
   @override
   void initState() {
     Get.put(deviceName);
@@ -44,9 +45,9 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
     }
   // 清空设备列表
     BluetoothDevice device = await startScan(); // 扫描设备
-    if (kDebugMode.value) {
-      print(device.localName);
-    }
+
+    kDebugMode.value ? print(device.localName):null;
+
     if( !scanResults.contains(device))
     {
     scanResults.add(device);} // 添加设备到 scanResults 列表
@@ -59,14 +60,14 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
 
     device.connectionState.listen((connectionState) {
       if (connectionState == BluetoothConnectionState.connected) {
-        if (kDebugMode.value) {
-          print("Connected successfully");
-        }
+
+        kDebugMode.value ? print("Connected successfully"):null;
+
         _isConnected.value = true;
         completer.complete(true); // 完成 Future，并返回 true
       } else if (connectionState == BluetoothConnectionState.disconnected) {
         _isConnected.value = false;
-        completer.complete(null); // 完成 Future，并返回 false
+        completer.complete(false); // 完成 Future，并返回 false
       }
     });
 
@@ -77,10 +78,10 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
     await device.disconnect();
     device.connectionState.listen((connectionState) {
       if (connectionState == BluetoothConnectionState.connected) {
-        print("Connected successfully");
+        kDebugMode.value ? print("Connected successfully"):null;
         _isConnected.value = true;
       } else if (connectionState == BluetoothConnectionState.disconnected) {
-        print("Disconnected");
+        kDebugMode.value ? print("Disconnected"):null;
         _isConnected.value = false;
       }
     });
@@ -93,7 +94,9 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
   }
   @override
   void dispose() {
-    scanResults.forEach((device) => _disconnect(device)); // 断开所有连接的设备
+    for (var device in scanResults) {
+      _disconnect(device);
+    } // 断开所有连接的设备
     _stopScan();
 // 停止扫描
     super.dispose();
@@ -103,6 +106,7 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
     return Scaffold(
       appBar: const CustomAppBar(
         title: 'ADD DEVICE',
+        leading:null,
       ),
       backgroundColor: Colors.black,
       body: Padding(
@@ -190,7 +194,7 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
                                 _disconnect(device);
                               } else {
                                 _connect(device).then((value) {
-                                  value == true ? Future.delayed(Duration(seconds: 1), () {
+                                  value == true ? Future.delayed(const Duration(seconds: 1), () {
                                     Get.to(BluetoothCommand(device: device));
                                   }) : null;
                                 });
