@@ -20,11 +20,9 @@ Future<BluetoothDevice> startScan() {
         .map((result) => result.device)
         .firstWhere((device) => device.localName == deviceName.value,
         orElse: () => unknownDevice);
-
     if (!completer.isCompleted && device != unknownDevice) {
       // 完成Completer并返回设备
       completer.complete(device);
-
       // 取消扫描订阅
       scanSubscription?.cancel();
     }

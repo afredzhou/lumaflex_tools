@@ -1,5 +1,4 @@
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:lumaflex_tools/view/custom_app_bar.dart';
 import 'bytesToHexString.dart';
@@ -7,7 +6,9 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:lumaflex_tools/startNotify.dart';
 import 'package:get/get.dart';
 final RxString deviceName = Get.find();
+final RxBool kDebugMode = Get.find();
 class BluetoothCommand extends StatefulWidget {
+
   final BluetoothDevice device;// 添加一个名为 Device 的参数
   const BluetoothCommand({Key? key, required this.device}) : super(key: key);
 
@@ -16,24 +17,31 @@ class BluetoothCommand extends StatefulWidget {
 }
 
 class BluetoothCommandState extends State<BluetoothCommand> {
+  final List<String> buttonLabels =[
+    "开始", "结束", "暂停", '关机', '平衡调光', '弹力调光', '集中调光', '冥想调光','监听'];
+  final Function(String) onCommandSent = (command) => print('Command sent: $command');
   var data = "".obs;
-  static const serviceUUID = '0000ff00-0000-1000-8000-00805f9b34fb';
-  static const characteristicUUID = '0000ff02-0000-1000-8000-00805f9b34fb';
-  static const readCharacteristicUUID = '0000ff01-0000-1000-8000-00805f9b34fb';
+  static const serviceUUID = '0000fff0-0000-1000-8000-00805f9b34fb';
+  static const characteristicUUID = '0000fffb-0000-1000-8000-00805f9b34fb';
+  static const readCharacteristicUUID = '0000fffa-0000-1000-8000-00805f9b34fb';
 
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 1), () async
-    {
-      data.value = (await startNotify(
-              widget.device,
-              serviceUUID,
-              readCharacteristicUUID,
-            )) as String; });
+     Future.delayed(const Duration(seconds: 1), () async {
+      final result = await startNotify(widget.device, serviceUUID, readCharacteristicUUID);
+
+       if (result != null) {
+        data.value = result as String;
+       } else {
+        // 处理值为 null 的情况
+        // 可以提供默认值或采取其他逻辑
+        data.value = ''; // 设置默认值为空字符串
+      }
+      });
+
   }
   // List<int> hexList = [0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff];
-
   void turnOff(device) async {
     try {
       List<BluetoothService> services = await widget.device.discoverServices();
@@ -45,11 +53,11 @@ class BluetoothCommandState extends State<BluetoothCommand> {
           for (BluetoothCharacteristic characteristic in service.characteristics) {
             if (characteristic.uuid.toString() == characteristicUUID) {
               var hexList= convertHexStringToList(off_commad_hex_String);
-              if (kDebugMode) {
-                if (kDebugMode) {
-                  print(hexList);
-                }
-              }
+
+
+              kDebugMode.value ? print(hexList) : null;
+
+
               // await characteristic.writeLarge(hexList, mtu);
               await characteristic.write(hexList); // Write data using WriteLarge extension
             }
@@ -57,9 +65,9 @@ class BluetoothCommandState extends State<BluetoothCommand> {
         }
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('Error : $e');
-      }
+
+      kDebugMode.value ? print('Error : $e'):null;
+
     }
   }
 
@@ -93,13 +101,13 @@ class BluetoothCommandState extends State<BluetoothCommand> {
       ),
       body: Center(
         child: Column(
-          // mainAxisAlignment: MainAxisAlignment.spaceAround,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            Image.asset(
-              'assets/images/lumaflex.png',
-              width: 600,
-              fit: BoxFit.fitWidth,
-            ),
+            // Image.asset(
+            //   'assets/images/lumaflex.png',
+            //   width: 600,
+            //   fit: BoxFit.fitWidth,
+            // ),
             Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -131,81 +139,28 @@ class BluetoothCommandState extends State<BluetoothCommand> {
                       // 添加其他样式属性
                     ),),]
             ),
-        Expanded(
-          flex: 1,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                SizedBox(height: 10), // 设置按钮之间的垂直间距
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: Size(150, 50), backgroundColor: Colors.red, // 设置按钮最小尺寸为150x50
-                    textStyle: TextStyle(fontSize: 16), // 设置按钮的背景色
-                  ),
-                  onPressed: () {
-                    switchButton([20, 11, 03]);
-                    // 在这里添加第二个按钮的点击事件逻辑
-                    print("630nm");
-                  },
-                  child: Text("630mm"),
-                ),
-                SizedBox(height: 10), // 设置按钮之间的垂直间距
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: Size(150, 50), backgroundColor: Colors.red, // 设置按钮最小尺寸为150x50
-                    textStyle: TextStyle(fontSize: 16), // 设置按钮的背景色
-                  ),
-                  onPressed: () {
-                    switchButton([20, 12, 03]);
-                    // 在这里添加第三个按钮的点击事件逻辑
-                    print("630mm+850mm");
-                  },
-                  child: Text("630mm+850mm"),
-                ),
-                SizedBox(height: 10), // 设置按钮之间的垂直间距
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: Size(150, 50), backgroundColor: Colors.red, // 设置按钮最小尺寸为150x50
-                    textStyle: TextStyle(fontSize: 16), // 设置按钮的背景色
-                  ),
-                  onPressed: () {
-                    switchButton([20, 13, 03]);
-                    // 在这里添加第四个按钮的点击事件逻辑
-                    print("630mm+940mm");
-                  },
-                  child: Text("630mm+940mm"),
-                ),
-                SizedBox(height: 10), // 设置按钮之间的垂直间距
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: Size(150, 50), backgroundColor: Colors.red, // 设置按钮最小尺寸为150x50
-                    textStyle: TextStyle(fontSize: 16), // 设置按钮的背景色
-                  ),
-                  onPressed: () {
-                    switchButton([20, 14, 03]);
-                    // 在这里添加第五个按钮的点击事件逻辑
-                    print("630nm+850mm+940mm");
-                  },
-                  child: Text("630nm+850mm+940mm"),
-                ),
-                SizedBox(height: 10), // 设置按钮之间的垂直间距
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: Size(150, 50), backgroundColor: Colors.red, // 设置按钮最小尺寸为150x50
-                    textStyle: TextStyle(fontSize: 16), // 设置按钮的背景色
-                  ),
-                  onPressed: () {
-                    switchButton([20, 15, 03]);
-                    // 在这里添加第五个按钮的点击事件逻辑
-                    print("630nm+850mm+940mm");
-                  },
-                  child: Text("630nm+850mm+940mm(Constant On)"),
-                ),
-              ],
-            ),
-        ),
-
-
+            Container(
+              width: 500,
+              height: 800,
+              child: ListView.builder(
+                itemCount: buttonLabels.length,
+                itemBuilder: (BuildContext context, int index) {
+                  final label = buttonLabels[index];
+                  return ElevatedButton(
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(Colors.red), // 设置背景颜色为红色
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10), // 设置圆角半径
+                        ),
+                      ),
+                    ),
+                    onPressed: () => onCommandSent(label),
+                    child: Text(label),
+                  );
+                },
+              ),
+            )
           ],
         ),
       ),

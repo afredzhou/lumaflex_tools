@@ -28,15 +28,15 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
 
   final RxList<BluetoothDevice> scanResults = RxList<BluetoothDevice>();
 
-  bool _isScanning = true;
+  bool _isScanning = false;
   final _isConnected = false.obs;
-  var deviceName = "Cerathrive".obs;
-  // var deviceName = "Lumaflex".obs;
+  // var deviceName = "Cerathrive".obs;
+  var deviceName = "Lumaflex".obs;
   @override
   void initState() {
-    Get.put(deviceName);
     super.initState();
-    _startScan();
+    Get.put(deviceName);
+   _startScan();
   }
   Future<void> _startScan() async {
     if(!_isConnected.value)
@@ -53,25 +53,18 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
     scanResults.add(device);} // 添加设备到 scanResults 列表
   }
 
-  Future<bool> _connect(device) async {
-    Completer<bool> completer = Completer<bool>(); // 创建一个 Completer<bool> 对象
-
+  Future<bool ?> _connect(device) async {
     await device.connect();
-
-    device.connectionState.listen((connectionState) {
-      if (connectionState == BluetoothConnectionState.connected) {
-
-        kDebugMode.value ? print("Connected successfully"):null;
-
-        _isConnected.value = true;
-        completer.complete(true); // 完成 Future，并返回 true
-      } else if (connectionState == BluetoothConnectionState.disconnected) {
-        _isConnected.value = false;
-        completer.complete(false); // 完成 Future，并返回 false
-      }
-    });
-
-    return completer.future; // 返回 Future<bool>
+    _isConnected.value = true;
+    // await device.connectionState.listen((connectionState) async {
+    //     if (connectionState == BluetoothConnectionState.connected) {
+    //       kDebugMode.value ? print("Connected successfully") : null;
+    //       _isConnected.value = true;
+    //     } else {
+    //       _isConnected.value = false;
+    //     }
+    //   });
+      return _isConnected.value;
   }
 
   void _disconnect(device) async {
@@ -191,11 +184,12 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
                             ),
                             onPressed: () async {
                               if (_isConnected.value) {
-                                _disconnect(device);
+                                 _disconnect(device);
                               } else {
-                                _connect(device).then((value) {
-                                  value == true ? Future.delayed(const Duration(seconds: 1), () {
-                                    Get.to(BluetoothCommand(device: device));
+                               await _connect(device).then((value) {
+                                  value == true ? Future.delayed(const Duration(milliseconds: 500), () {
+                                    Get.to(() => BluetoothCommand(device: device));
+
                                   }) : null;
                                 });
                               }
@@ -206,7 +200,6 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
                       );
                     },
                   ),
-
               ),
             ),
           ],
@@ -219,7 +212,6 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
             if (_isScanning) {
               _startScan();
               _isScanning = true;
-
             } else {
               _stopScan();
               _isScanning = false;
