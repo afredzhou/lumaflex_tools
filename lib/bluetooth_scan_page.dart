@@ -30,8 +30,8 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
 
   bool _isScanning = false;
   final _isConnected = false.obs;
-  // var deviceName = "Cerathrive".obs;
-  var deviceName = "Lumaflex".obs;
+  var deviceName = "Cerathrive".obs;
+  // var deviceName = "Lumaflex".obs;
   @override
   void initState() {
     super.initState();
@@ -54,16 +54,16 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
   }
 
   Future<bool ?> _connect(device) async {
-    await device.connect();
     _isConnected.value = true;
-    // await device.connectionState.listen((connectionState) async {
-    //     if (connectionState == BluetoothConnectionState.connected) {
-    //       kDebugMode.value ? print("Connected successfully") : null;
-    //       _isConnected.value = true;
-    //     } else {
-    //       _isConnected.value = false;
-    //     }
-    //   });
+    await device.connect();
+    await device.connectionState.listen((connectionState) async {
+        if (connectionState == BluetoothConnectionState.connected) {
+          kDebugMode.value ? print("Connected successfully") : null;
+          _isConnected.value = true;
+        } else {
+          _isConnected.value = false;
+        }
+      });
       return _isConnected.value;
   }
 

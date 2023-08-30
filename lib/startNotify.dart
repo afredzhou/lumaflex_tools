@@ -1,20 +1,44 @@
+import 'dart:async';
+
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
-Future<List<List<int>>?> startNotify(BluetoothDevice device, String serviceUUID, String characteristicUUID) async {
+Future<List<int>?> startNotify(BluetoothDevice device, String serviceUUID, String characteristicUUID) async {
+  final resultList = <int>[];
   List<BluetoothService> services = await device.discoverServices();
-  if (services.isNotEmpty) { // 修改了 if 条件，从 device 变为 services
-    List<BluetoothService> services = await device.discoverServices();
 
-    for (BluetoothService service in services) { // 使用 for 循环替代 forEach
-      if (service.uuid.toString().toLowerCase() == serviceUUID) {
-        for (BluetoothCharacteristic characteristic in service.characteristics) { // 使用 for 循环替代 forEach
-          if (characteristic.uuid.toString().toLowerCase() == characteristicUUID) {
-            characteristic.setNotifyValue(true);
-            return await characteristic.value.toList(); // 返回接收到的数据
-          }
+  for (BluetoothService service in services) {
+    if (service.uuid.toString().toLowerCase() == serviceUUID) {
+      for (BluetoothCharacteristic characteristic in service.characteristics) {
+        if (characteristic.uuid.toString().toLowerCase() == characteristicUUID) {
+          await characteristic.setNotifyValue(true);
+
+          // 创建一个 Completer 用于等待异步事件的完成
+          final Completer<List<int>?> completer = Completer();
+
+          // 监听事件流
+          StreamSubscription<List<int>> subscription;
+          subscription = characteristic.onValueReceived.listen((value) {
+            resultList.addAll(value); // 处理新值
+
+            // 检查是否已准备好返回结果
+            if (!completer.isCompleted) {
+              completer.complete(resultList);
+            }
+          });
+
+          // 这里可以考虑增加超时逻辑，确保可以及时结束等待
+
+          // 使用 await 等待流结束或超时
+          await completer.future;
+
+          // 取消监听事件流
+          subscription.cancel();
+
+          return resultList;
         }
       }
     }
   }
-  return null; // 如果没有找到匹配的服务和特征，返回 null
+
+  return null;
 }
