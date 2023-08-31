@@ -52,6 +52,8 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
     super.initState();
     Get.put(deviceName);
   }
+
+
   Future<void> _startScan() async {
     const scanTimeout = 10;
     scanResults.clear();
@@ -84,13 +86,6 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
       // 不包含则添加
       scanResults.add(ScannedDevice(device, DateTime.now()));
     }
-
-    // if (!scanResults.contains(ScannedDevice(device, DateTime.now())))
-    // {
-    //   // 创建ScannedDevice添加到列表
-    //   scanResults.add(ScannedDevice(device, DateTime.now()));
-    //
-    // } // 添加设备到 scanResults 列表
   }
 
   Future<bool ?> _connect(device) async {
@@ -103,6 +98,7 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
           connectedDevices.add(device);
         } else {
           _isConnected.value = false;
+          connectedDevices.remove(device);
         }
       });
       return _isConnected.value;

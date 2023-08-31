@@ -28,7 +28,7 @@ class BluetoothCommandState extends State<BluetoothCommand> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 3), () async {
+    Future.delayed(const Duration(milliseconds: 500), () async {
       // 使用await获取Stream
       final Stream<List<int>?> valuesStream = await startNotify(
           widget.device, serviceUUID, readCharacteristicUUID);
@@ -75,28 +75,28 @@ class BluetoothCommandState extends State<BluetoothCommand> {
   //   }
   // }
 
-  // void switchButton(List<int> intList) async {
-  //   try {
-  //     List<BluetoothService> services = await widget.device.discoverServices();
-  //     // const off_commad_hex_String = "0000000000ff00ffffffffffffffffffff";
-  //     final red_light_command =  intList;
-  //     for (BluetoothService service in services) {
-  //       if (service.uuid.toString() == serviceUUID) {
-  //         for (BluetoothCharacteristic characteristic in service.characteristics) {
-  //           if (characteristic.uuid.toString() == characteristicUUID) {
-  //             // var hexList= convertHexStringToList(off_commad_hex_String);
-  //             print(red_light_command  );
-  //             // await characteristic.writeLarge(hexList, mtu);
-  //             await characteristic.write(red_light_command); // Write data using WriteLarge extension
-  //           }
-  //         }
-  //       }
-  //     }
-  //   } catch (e) {
-  //     print('Error : $e');
-  //   }
-  //
-  // }
+  void switchButton(List<int> intList) async {
+    try {
+      List<BluetoothService> services = await widget.device.discoverServices();
+      // const off_commad_hex_String = "0000000000ff00ffffffffffffffffffff";
+      final red_light_command =  intList;
+      for (BluetoothService service in services) {
+        if (service.uuid.toString() == serviceUUID) {
+          for (BluetoothCharacteristic characteristic in service.characteristics) {
+            if (characteristic.uuid.toString() == characteristicUUID) {
+              // var hexList= convertHexStringToList(off_commad_hex_String);
+              print(red_light_command  );
+              // await characteristic.writeLarge(hexList, mtu);
+              await characteristic.write(red_light_command); // Write data using WriteLarge extension
+            }
+          }
+        }
+      }
+    } catch (e) {
+      print('Error : $e');
+    }
+
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

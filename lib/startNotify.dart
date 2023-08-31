@@ -16,8 +16,6 @@ Future<Stream<List<int>?>> startNotify(
           await characteristic.setNotifyValue(true);
 
           // 监听值变化
-          StreamSubscription<List<int>> subscription =
-          characteristic.onValueReceived.listen((value) {});
 
           // 返回Characteristic的值流
           return characteristic.onValueReceived;
