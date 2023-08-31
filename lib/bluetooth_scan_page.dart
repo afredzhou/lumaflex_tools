@@ -44,7 +44,7 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
 
   bool _isScanning = false;
   final _isConnected = false.obs;
-  final connectedDevices = <BluetoothDevice>[];
+  var connectedDevices = <BluetoothDevice>[].obs;
   var deviceName = "Cerathrive".obs;
   // var deviceName = "Lumaflex".obs;
   @override
@@ -57,15 +57,11 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
     scanResults.clear();
     // 将已连接设备添加到扫描结果
     for (BluetoothDevice device in connectedDevices) {
-
       // 检查是否已经在扫描结果中
       if (!scanResults.any((scanned) => scanned.device == device)) {
-
         // 不在结果中,才添加
         scanResults.add(ScannedDevice(device, DateTime.now()));
-
       }
-
     }
         Timer.periodic(const Duration(seconds: 1), (timer) {
 
