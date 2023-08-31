@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:lumaflex_tools/view/custom_app_bar.dart';
 import 'package:lumaflex_tools/write_value.dart';
-import 'bytesToHexString.dart';
+import 'bytes_to_hex_string.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:lumaflex_tools/startNotify.dart';
 import 'package:get/get.dart';
@@ -28,17 +28,18 @@ class BluetoothCommandState extends State<BluetoothCommand> {
   @override
   void initState() {
     super.initState();
-     Future.delayed(const Duration(seconds: 1), () async {
-       late final List<int> resultList;
-      final result = await startNotify(widget.device, serviceUUID, readCharacteristicUUID);
-       if (result != null) {
-         resultList= Uint8List.fromList(result);
-        data.value = bytesToHexString(resultList);
-       } else {
-        // 处理值为 null 的情况
-        data.value = ''; // 设置默认值为空字符串
-      }
+    Future.delayed(const Duration(seconds: 3), () async {
+      // 使用await获取Stream
+      final Stream<List<int>?> valuesStream = await startNotify(
+          widget.device, serviceUUID, readCharacteristicUUID);
+      // 监听Stream的值
+      valuesStream.listen((bytes) {
+        // 将字节转换为hex string
+        String hexString = bytesToHexString(bytes);
+        // 更新UI
+        data.value = hexString;
       });
+    });
 
   }
   // List<int> hexList = [0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff];
@@ -114,15 +115,14 @@ class BluetoothCommandState extends State<BluetoothCommand> {
             Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(//
-                    'Data from ${deviceName.value}：${data.value} ',
+                  Obx(() => Text(
+                    'Data from ${deviceName.value}: ${data.value}',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 22,
                       color: Colors.red,
-                      // 添加其他样式属性
                     ),
-                  ),
+                  ))  ,
                   Text('Device: ${widget.device.localName}',
                   style: const TextStyle(
                     fontSize: 22,

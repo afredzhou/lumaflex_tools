@@ -13,7 +13,21 @@ class BluetoothController extends GetxController {
     scanResults.add(device);
   }
 }
+class ScannedDevice {
+  final BluetoothDevice device;
+  final DateTime time;
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
 
+    return other is ScannedDevice &&
+        other.device.remoteId == device.remoteId;
+  }
+
+  @override
+  int get hashCode => device.remoteId.hashCode;
+  ScannedDevice(this.device, this.time);
+}
 final RxBool kDebugMode = Get.find(); // 在需要的地方获取全局变量
 
 class BluetoothScanPage extends StatefulWidget {
@@ -26,53 +40,84 @@ class BluetoothScanPage extends StatefulWidget {
 class _BluetoothScanPageState extends State<BluetoothScanPage> {
 
 
-  final RxList<BluetoothDevice> scanResults = RxList<BluetoothDevice>();
+  final RxList<ScannedDevice> scanResults = RxList<ScannedDevice>();
 
   bool _isScanning = false;
   final _isConnected = false.obs;
+  final connectedDevices = <BluetoothDevice>[];
   var deviceName = "Cerathrive".obs;
   // var deviceName = "Lumaflex".obs;
   @override
   void initState() {
     super.initState();
     Get.put(deviceName);
-   _startScan();
   }
   Future<void> _startScan() async {
-    if(!_isConnected.value)
-      {
+    const scanTimeout = 10;
     scanResults.clear();
+    // 将已连接设备添加到扫描结果
+    for (BluetoothDevice device in connectedDevices) {
+
+      // 检查是否已经在扫描结果中
+      if (!scanResults.any((scanned) => scanned.device == device)) {
+
+        // 不在结果中,才添加
+        scanResults.add(ScannedDevice(device, DateTime.now()));
+
+      }
+
     }
+        Timer.periodic(const Duration(seconds: 1), (timer) {
+
+          scanResults.removeWhere((device) {
+            if (connectedDevices.contains(device.device)) return false;
+            return DateTime.now().difference(device.time) >= const Duration(seconds: scanTimeout);
+          });
+        });
+
   // 清空设备列表
     BluetoothDevice device = await startScan(); // 扫描设备
 
     kDebugMode.value ? print(device.localName):null;
 
-    if( !scanResults.contains(device))
-    {
-    scanResults.add(device);} // 添加设备到 scanResults 列表
+    if (scanResults.any((scanned) {
+      return scanned == ScannedDevice(device, DateTime.now());
+    })) {
+      // 已包含则不添加
+    } else {
+      // 不包含则添加
+      scanResults.add(ScannedDevice(device, DateTime.now()));
+    }
+
+    // if (!scanResults.contains(ScannedDevice(device, DateTime.now())))
+    // {
+    //   // 创建ScannedDevice添加到列表
+    //   scanResults.add(ScannedDevice(device, DateTime.now()));
+    //
+    // } // 添加设备到 scanResults 列表
   }
 
   Future<bool ?> _connect(device) async {
+    _stopScan();
     _isConnected.value = true;
     await device.connect();
     await device.connectionState.listen((connectionState) async {
         if (connectionState == BluetoothConnectionState.connected) {
           kDebugMode.value ? print("Connected successfully") : null;
-          _isConnected.value = true;
+          connectedDevices.add(device);
         } else {
           _isConnected.value = false;
         }
       });
       return _isConnected.value;
   }
-
   void _disconnect(device) async {
     await device.disconnect();
     device.connectionState.listen((connectionState) {
       if (connectionState == BluetoothConnectionState.connected) {
         kDebugMode.value ? print("Connected successfully"):null;
         _isConnected.value = true;
+        connectedDevices.remove(device);
       } else if (connectionState == BluetoothConnectionState.disconnected) {
         kDebugMode.value ? print("Disconnected"):null;
         _isConnected.value = false;
@@ -87,9 +132,6 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
   }
   @override
   void dispose() {
-    for (var device in scanResults) {
-      _disconnect(device);
-    } // 断开所有连接的设备
     _stopScan();
 // 停止扫描
     super.dispose();
@@ -152,7 +194,9 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
                     ListView.builder(
                     itemCount: scanResults.length,
                     itemBuilder: (context, index) {
-                      final BluetoothDevice device = scanResults[index];
+                      final ScannedDevice scannedDevice = scanResults[index];
+// 从ScannedDevice中获取BluetoothDevice
+                      final BluetoothDevice device = scannedDevice.device;
                       return Container(
                         margin: const EdgeInsets.symmetric(vertical: 8.0),
                         decoration: BoxDecoration(

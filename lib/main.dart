@@ -16,10 +16,10 @@ void main() {
       Permission.bluetoothConnect,
       Permission.bluetoothScan
     ].request().then((status) {
-      runApp(MyApp());
+      runApp(const MyApp());
     });
   } else {
-    runApp(MyApp());
+    runApp(const MyApp());
   }
 }
 
@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
         fontFamily: 'BebasNeue-Regular',
         // 设置您的自定义主题
       ),
-      home: BluetoothScanPage(),
+      home: const BluetoothScanPage(),
     );
   }
 }
