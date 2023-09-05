@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:lumaflex_tools/view/custom_app_bar.dart';
@@ -8,7 +7,6 @@ import 'start_scan.dart';
 import 'package:get/get.dart';
 class BluetoothController extends GetxController {
   final scanResults = RxList<BluetoothDevice>();
-
   void addDevice(BluetoothDevice device) {
     scanResults.add(device);
   }
@@ -19,29 +17,22 @@ class ScannedDevice {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-
     return other is ScannedDevice &&
         other.device.remoteId == device.remoteId;
   }
-
   @override
   int get hashCode => device.remoteId.hashCode;
   ScannedDevice(this.device, this.time);
 }
 final RxBool kDebugMode = Get.find(); // 在需要的地方获取全局变量
-
 class BluetoothScanPage extends StatefulWidget {
   const BluetoothScanPage({Key? key}) : super(key: key);
-
   @override
   _BluetoothScanPageState createState() => _BluetoothScanPageState();
 }
 
 class _BluetoothScanPageState extends State<BluetoothScanPage> {
-
-
   final RxList<ScannedDevice> scanResults = RxList<ScannedDevice>();
-
   bool _isScanning = false;
   final _isConnected = false.obs;
   var connectedDevices = <BluetoothDevice>[].obs;
@@ -52,8 +43,6 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
     super.initState();
     Get.put(deviceName);
   }
-
-
   Future<void> _startScan() async {
     const scanTimeout = 10;
     scanResults.clear();
@@ -66,18 +55,14 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
       }
     }
         Timer.periodic(const Duration(seconds: 1), (timer) {
-
           scanResults.removeWhere((device) {
             if (connectedDevices.contains(device.device)) return false;
             return DateTime.now().difference(device.time) >= const Duration(seconds: scanTimeout);
           });
         });
-
   // 清空设备列表
     BluetoothDevice device = await startScan(); // 扫描设备
-
     kDebugMode.value ? print(device.localName):null;
-
     if (scanResults.any((scanned) {
       return scanned == ScannedDevice(device, DateTime.now());
     })) {
@@ -87,7 +72,6 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
       scanResults.add(ScannedDevice(device, DateTime.now()));
     }
   }
-
   Future<bool ?> _connect(device) async {
     _stopScan();
     _isConnected.value = true;
