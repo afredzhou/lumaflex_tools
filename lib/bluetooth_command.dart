@@ -19,7 +19,7 @@ class BluetoothCommand extends StatefulWidget {
 
 class BluetoothCommandState extends State<BluetoothCommand> {
   final List<String> buttonLabels =[
-    "区域1",  "开始", "结束", "暂停", '关机', '平衡调光', '弹力调光', '集中调光', '冥想调光',];
+    "区域1(Area 1)",  "开始(Start)", "结束(Stop)", "暂停(Pause)", '关机', '平衡调光', '弹力调光', '集中调光', '冥想调光',];
   static const commandList = [[0x11], [0x02], [0x04],  [0x03],   [0x17],   [0x33],  [0x49],   [0x81],    [0x97],  ];
   var data = "".obs;
   static const serviceUUID = '0000ffe0-0000-1000-8000-00805f9b34fb';
