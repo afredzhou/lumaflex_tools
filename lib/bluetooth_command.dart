@@ -20,7 +20,7 @@ class BluetoothCommand extends StatefulWidget {
 class BluetoothCommandState extends State<BluetoothCommand> {
   final List<String> buttonLabels =[
     "区域1",  "开始", "结束", "暂停", '关机', '平衡调光', '弹力调光', '集中调光', '冥想调光',];
-  static const commandList = [[0x11], [0x02],  [0x04],   [0x03],   [0x17],   [0x33],  [0x49],   [0x81],    [0x97],  ];
+  static const commandList = [[0x11], [0x02], [0x04],  [0x03],   [0x17],   [0x33],  [0x49],   [0x81],    [0x97],  ];
   var data = "".obs;
   static const serviceUUID = '0000fff0-0000-1000-8000-00805f9b34fb';
   static const characteristicUUID = '0000fffb-0000-1000-8000-00805f9b34fb';
@@ -29,22 +29,43 @@ class BluetoothCommandState extends State<BluetoothCommand> {
   void initState() {
     super.initState();
     Future.delayed(const Duration(milliseconds: 500), () async {
-      // 使用await获取Stream
-      final Stream<List<int>?> valuesStream = await startNotify(
-          widget.device, serviceUUID, readCharacteristicUUID);
-      // 监听Stream的值
-      valuesStream.listen((bytes) {
-        // 将字节转换为hex string
-        String hexString = bytesToHexString(bytes);
-        // 更新UI
-        data.value = hexString;
-      });
+      final services = await widget.device.discoverServices();
+      for (BluetoothService service in services) {
+        if (service.uuid.toString() == serviceUUID) {
+          for (BluetoothCharacteristic characteristic in service.characteristics) {
+            if (characteristic.uuid.toString() == readCharacteristicUUID) {
+              // 使用await获取Stream
+              final Stream<List<int>?> valuesStream = await startNotify(
+                  widget.device, serviceUUID, readCharacteristicUUID);
+              // 监听Stream的值
+              valuesStream.listen((bytes) {
+                // 将字节转换为hex string
+                String hexString = bytesToHexString(bytes);
+                // 更新UI
+                data.value = hexString;
+              });
+              // await    writeValue(widget.device, serviceUUID, characteristicUUID, data);
+            }
+          }
+        }
+      }
+
     });
 
   }
   // List<int> hexList = [0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff];
-  void onCommandSent (List<int> data) {
-    writeValue(widget.device, serviceUUID, characteristicUUID, data);
+  void onCommandSent (List<int> data) async{
+    final services = await widget.device.discoverServices();
+    for (BluetoothService service in services) {
+      if (service.uuid.toString() == serviceUUID) {
+        for (BluetoothCharacteristic characteristic in service.characteristics) {
+          if (characteristic.uuid.toString() == characteristicUUID) {
+            await    writeValue(widget.device, serviceUUID, characteristicUUID, data);
+          }
+        }
+      }
+    }
+
   }
   // void turnOff(device) async {
   //   try {
