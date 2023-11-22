@@ -22,9 +22,9 @@ class BluetoothCommandState extends State<BluetoothCommand> {
     "区域1",  "开始", "结束", "暂停", '关机', '平衡调光', '弹力调光', '集中调光', '冥想调光',];
   static const commandList = [[0x11], [0x02], [0x04],  [0x03],   [0x17],   [0x33],  [0x49],   [0x81],    [0x97],  ];
   var data = "".obs;
-  static const serviceUUID = '0000fff0-0000-1000-8000-00805f9b34fb';
-  static const characteristicUUID = '0000fffb-0000-1000-8000-00805f9b34fb';
-  static const readCharacteristicUUID = '0000fffa-0000-1000-8000-00805f9b34fb';
+  static const serviceUUID = '0000ffe0-0000-1000-8000-00805f9b34fb';
+  static const characteristicUUID = '0000ffeb-0000-1000-8000-00805f9b34fb';
+  static const readCharacteristicUUID = '0000ffea-0000-1000-8000-00805f9b34fb';
   @override
   void initState() {
     super.initState();

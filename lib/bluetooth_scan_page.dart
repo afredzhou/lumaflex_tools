@@ -114,9 +114,10 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
   }
   @override
   Widget build(BuildContext context) {
-    double baseFontSize = 16.0; // 设置基础字体大小
 
-    double fontSize = baseFontSize * MediaQuery.of(context).textScaleFactor;
+    double screenWidth = MediaQuery.of(context).size.width;
+    double fontSize = screenWidth * 0.05; // 根据屏幕宽度的百分比计算字体大小
+
 
     return Scaffold(
       appBar: const CustomAppBar(
