@@ -164,8 +164,8 @@ class BluetoothCommandState extends State<BluetoothCommand> {
                     ),),]
             ),
             SizedBox(
-              width: 500,
-              height: 800,
+              width: MediaQuery.of(context).size.width * 0.8, // 使用屏幕宽度的80%
+              height: MediaQuery.of(context).size.height * 0.8, // 使用屏幕高度的80%
               child: ListView.builder(
                 itemCount: buttonLabels.length,
                 itemBuilder: (BuildContext context, int index) {

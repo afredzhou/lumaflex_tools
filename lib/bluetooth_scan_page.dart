@@ -114,6 +114,10 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
   }
   @override
   Widget build(BuildContext context) {
+    double baseFontSize = 16.0; // 设置基础字体大小
+
+    double fontSize = baseFontSize * MediaQuery.of(context).textScaleFactor;
+
     return Scaffold(
       appBar: const CustomAppBar(
         title: 'ADD DEVICE',
@@ -148,11 +152,12 @@ class _BluetoothScanPageState extends State<BluetoothScanPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                   Text(
                     "Nearby Devices",
                     style: TextStyle(
                       color: Colors.grey, // 设置第一个文本字体颜色
-                      fontSize: 25.0,
+                      fontSize: fontSize,
+
                     ),
                   ),
                   Text(
