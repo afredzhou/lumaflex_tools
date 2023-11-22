@@ -20,7 +20,7 @@ class BluetoothCommand extends StatefulWidget {
 class BluetoothCommandState extends State<BluetoothCommand> {
   final List<String> buttonLabels =[
     "区域1(Area 1)",  "开始(Start)", "结束(Stop)", "暂停(Pause)", '关机', '平衡调光', '弹力调光', '集中调光', '冥想调光',];
-  static const commandList = [[0x11], [0x02], [0x04],  [0x03],   [0x17],   [0x33],  [0x49],   [0x81],    [0x97],  ];
+  static const commandList = [[0x11], [0x02], [0x04],  [0x03], [0x17], [0x33],  [0x49], [0x81], [0x97],  ];
   var data = "".obs;
   static const serviceUUID = '0000ffe0-0000-1000-8000-00805f9b34fb';
   static const characteristicUUID = '0000ffeb-0000-1000-8000-00805f9b34fb';
@@ -100,15 +100,15 @@ class BluetoothCommandState extends State<BluetoothCommand> {
     try {
       List<BluetoothService> services = await widget.device.discoverServices();
       // const off_commad_hex_String = "0000000000ff00ffffffffffffffffffff";
-      final red_light_command =  intList;
+      final redLightCommand =  intList;
       for (BluetoothService service in services) {
         if (service.uuid.toString() == serviceUUID) {
           for (BluetoothCharacteristic characteristic in service.characteristics) {
             if (characteristic.uuid.toString() == characteristicUUID) {
               // var hexList= convertHexStringToList(off_commad_hex_String);
-              print(red_light_command  );
+              print(redLightCommand  );
               // await characteristic.writeLarge(hexList, mtu);
-              await characteristic.write(red_light_command); // Write data using WriteLarge extension
+              await characteristic.write(redLightCommand); // Write data using WriteLarge extension
             }
           }
         }
